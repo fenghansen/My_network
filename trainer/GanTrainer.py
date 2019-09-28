@@ -1,4 +1,4 @@
-from generator import Dategen
+from generator.Datagen import Datagenerator
 
 class Gan_Trainer():
     def __init__(self, config, g_model, d_model, preprocess = True, re_train = True, train_on_gan = False):
@@ -9,11 +9,11 @@ class Gan_Trainer():
         self.config = config
         self.train_on_gan = train_on_gan
 
-    def train(self):
+    def train(self, directory):
         # train using image_generator
         if self.preprocess == True:
-            train_datagen = Dategen()
-            train_generator = train_datagen.flow_from_directory()
+            train_datagen = Datagenerator()
+            train_generator = train_datagen.flow_from_directory(directory=directory)
             if self.train_on_gan:
                 # load pre_retained model
                 if not self.re_train:

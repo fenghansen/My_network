@@ -7,6 +7,7 @@ from keras.layers import Conv2D, Activation, Lambda
 def downsampling(x, n_filters):
     return Conv2D(filters=n_filters, kernel_size=3, strides=2, padding='same')(x)
 
+
 def subpixel(x, h_factor, w_factor):
     input_shape = K.shape(x)
     batch_size, h, w, c = input_shape
@@ -15,6 +16,7 @@ def subpixel(x, h_factor, w_factor):
     new_x = K.permute_dimensions(new_x, (0,1,3,2,4,5))
     output = K.reshape(new_x, shape=(batch_size, h*h_factor, w * w_factor, output_channels))
     return output
+
 
 def residual_block(x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
     residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
@@ -47,6 +49,9 @@ def Decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
     x = Lambda(subpixel, arguments={'h_factor': 2, 'w_factor': 2})(x)
     return x
 
+
+def hourglass(x, n_filters, kernel_size, strides=1, padding='same'):
+    pass
 
 
 

@@ -9,7 +9,7 @@ if __name__ == '__main':
     G_net = build_G(config)
     G_net.compile(optimizer=keras.optimizers.Adam(lr=2e-4))
     # D_net = build_D()
-    #g_model, d_model = build_gan(G_net, D_net)
+    # g_model, d_model = build_gan(G_net, D_net)
     trainer = Gan_Trainer(config, G_net, None)
     trainer.train()
 
