@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 
 class DataIter():
-    def __init__(self, img_dir, keypoint_dir, batch_size=32):
+    def __init__(self, img_dir, keypoint_dir, batch_size=32, preprocess=True):
         self.img_dir = img_dir
         self.keypoint_dir = keypoint_dir
         self.file_set = os.listdir(self.img_dir)

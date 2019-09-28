@@ -13,12 +13,12 @@ def subpixel(x, h_factor, w_factor):
     batch_size, h, w, c = input_shape
     output_channels = c // (h_factor * w_factor)
     new_x = K.reshape(x, shape=(batch_size, h, w, h_factor, w_factor, output_channels))
-    new_x = K.permute_dimensions(new_x, (0,1,3,2,4,5))
+    new_x = K.permute_dimensions(new_x, (0, 1, 3, 2, 4, 5))
     output = K.reshape(new_x, shape=(batch_size, h*h_factor, w * w_factor, output_channels))
     return output
 
 
-def residual_block(x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
+def residual_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
     residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(x)
@@ -53,6 +53,9 @@ def Decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
 def hourglass(x, n_filters, kernel_size, strides=1, padding='same'):
     pass
 
+
+def v_hourglass(a, p, n_filters, kernel_size, strides=1, padding='same'):
+    pass
 
 
 

@@ -29,7 +29,27 @@ def build_G(config):
     up_sample4 = Decode_block(up_sample3, input, 128, 3, 1, 'same')
 
     output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same')(up_sample4)
-    model = Model(inputs = input, outputs=[conv4, addition, output])
+    model = Model(inputs=input, outputs=[conv4, addition, output])
+    return model
+
+def build_stacked_hourglass(config_hg):
+    img_height = config_hg['height']
+    img_width = config_hg['width']
+    channels = config_hg['channels']
+    p_height = config_hg['p_height']
+    p_width = config_hg['p_width']
+    p_channels = config_hg['p_channels']
+
+    input_img = Input(shape=(img_height, img_width, channels))
+    input_pose = Input(shape=(p_height, p_width, p_channels))
+
+    a1, p1 = v_hourglass(input_img, input_pose, 64, 3)
+    a2, p2 = v_hourglass(a1, p1, 64, 3)
+    a3, p3 = v_hourglass(a2, p2, 64, 3)
+    a4, p4 = v_hourglass(a3, p3, 64, 3)
+
+    output = Conv2D(3, 3, 1, 'same')(a4)
+    model = Model(inputs=[input_img, input_pose], outputs=[output])
     return model
 
 
