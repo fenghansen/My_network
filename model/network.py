@@ -55,7 +55,7 @@ def build_stacked_hourglass(config):
     a2, p2 = v_hourglass(a1, p1, 64, 3)
     a3, p3 = v_hourglass(a2, p2, 64, 3)
 
-    output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same')(a3)
+    output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same', activation='sigmoid')(a3)
     model = Model(inputs=[input_img, input_pose], outputs=[output])
     return model
 
@@ -72,13 +72,12 @@ def build_d(config):
 
     input_img = Input(shape=(img_height, img_width, channels))
 
-    x = Conv2D(filters=64, kernel_size=3, strides=2, padding='same')(input_img)                     # 128
+    x = Conv2D(filters=64, kernel_size=3, strides=2, padding='same', activation='relu')(input_img)
     x = residual_block(x, n_filters=64, kernel_size=3, strides=1, padding='same')
-    x = Conv2D(filters=64, kernel_size=3, strides=2, padding='same')(x)                             # 64
+    x = Conv2D(filters=64, kernel_size=3, strides=2, padding='same', activation='relu')(x)
     x = residual_block(x, n_filters=64, kernel_size=3, strides=1, padding='same')
-    x = Conv2D(filters=3, kernel_size=3, strides=2, padding='same')(x)                             # 32
-    output = residual_block(x, n_filters=3, kernel_size=3, strides=1, padding='same')
-    score = Lambda(lambda z: K.mean(z))(output)
+    output = Conv2D(filters=3, kernel_size=3, strides=2, padding='same', activation='relu')(x)
+    score = Lambda(lambda z: K.mean(K.tanh(z)))(output)
     model = Model(inputs=input_img, outputs=score)
     return model
 
@@ -129,7 +128,7 @@ def build_gan(g_net, d_net, config):
 
     d_loss = get_dloss(real_score, fake_score)
     d_train_model.add_loss(K.mean(d_loss))
-    d_train_model.compile(optimizer=Adam(2e-3, 0.5))
+    d_train_model.compile(optimizer=Adam(lr=2e-5))
 
     g_net.trainable = True
     d_net.trainable = False
@@ -137,5 +136,5 @@ def build_gan(g_net, d_net, config):
     g_train_model = Model(inputs=[x_in, y_hat, gt], outputs=fake_score)
     g_loss = get_gloss(fake_score, x_fake, x_real)
     g_train_model.add_loss(K.mean(g_loss))
-    g_train_model.compile(optimizer=Adam(2e-4, 0.5))
-    return d_train_model, g_train_model
+    g_train_model.compile(optimizer=Adam(lr=2e-5))
+    return g_train_model, d_train_model

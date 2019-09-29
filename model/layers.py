@@ -1,7 +1,6 @@
 import keras
 import keras.backend as K
-import tensorflow
-from keras.layers import Conv2D, Activation, Lambda
+from keras.layers import Conv2D, Lambda, UpSampling2D, concatenate
 
 
 def downsampling(x, n_filters):
@@ -22,9 +21,6 @@ def residual_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
     residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(x)
-    residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
-               strides=strides, padding=padding,
-               activation='relu')(residual)
     residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(residual)
@@ -51,9 +47,18 @@ def decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
 
 
 def v_hourglass(a, p, n_filters, kernel_size, strides=1, padding='same'):
-
-    x = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=strides, padding=padding)(a)
-    return x, x
+    x1 = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=2*strides, padding=padding, activation='relu')(a)
+    x2 = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=2*strides, padding=padding, activation='relu')(x1)
+    x3 = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=2*strides, padding=padding, activation='relu')(x2)
+    x4 = UpSampling2D(size=2)(x3)
+    x4 = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=strides, padding=padding, activation='relu')(x4)
+    con1 = concatenate([x2, x4], axis=-1)
+    x5 = UpSampling2D(size=2)(con1)
+    x5 = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=strides, padding=padding, activation='relu')(x5)
+    con2 = concatenate([x1, x5], axis=-1)
+    x6 = UpSampling2D(size=2)(con2)
+    x6 = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=strides, padding=padding, activation='relu')(x6)
+    return x6, None
 
 
 

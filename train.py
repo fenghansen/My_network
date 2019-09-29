@@ -10,8 +10,12 @@ if __name__ == '__main__':
         config = yaml.load(f, Loader=yaml.FullLoader)
     g_net = build_stacked_hourglass(config)
     d_net = build_d(config)
-    g_model, d_model = build_gan(g_net, d_net, config)
-    trainer = Trainer(config, g_model, d_model, train_on_gan=True)
+    g_train_model, d_train_model = build_gan(g_net, d_net, config)
+
+    g_net.summary()
+    d_net.summary()
+
+    trainer = Trainer(config, g_net, d_net, g_train_model, d_train_model, train_on_gan=True)
     if not os.path.exists('/media/newbot/software/Pose-Transfer-master/fashion_data'):
         raise Exception
     trainer.train('/media/newbot/software/Pose-Transfer-master/fashion_data/train/',
