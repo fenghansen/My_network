@@ -3,7 +3,8 @@ import random
 import cv2
 import numpy as np
 
-class DataIter():
+
+class DataIter:
     def __init__(self, img_dir, keypoint_dir, batch_size=32, preprocess=True):
         self.img_dir = img_dir
         self.keypoint_dir = keypoint_dir
@@ -25,6 +26,7 @@ class DataIter():
             target_img = np.array(imgs)[self.batch_size:, :, :, :]
             target_k = np.array(keypoints)[self.batch_size:, :, :, :]
             yield input_img, input_k, target_img, target_k
+
 
 if __name__ == '__main__':
     dataIter = DataIter('./data/imgs/test/', './data/keypoints/test/')

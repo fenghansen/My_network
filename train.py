@@ -1,15 +1,18 @@
-from model.network import build_G, build_D, build_gan
+from model.network import build_g, build_d, build_gan, build_stacked_hourglass
 import yaml
-from trainer.GanTrainer import Gan_Trainer
-import keras
+from trainer.GanTrainer import Trainer
+import os
 
+os.environ['CUDA_VISIBLE_DEVICE'] = '0'
 
-if __name__ == '__main':
-    config = yaml.load('../config/config.yaml')
-    G_net = build_G(config)
-    # G_net.compile(optimizer=keras.optimizers.Adam(lr=config['lr_g']))
-    D_net = build_D(config)
-    # D_net.compile(optimizer=keras.optimizers.Adam(lr=config['lr_d']))
-    g_model, d_model = build_gan(G_net, D_net)
-    trainer = Gan_Trainer(config, g_model, d_model)
-    trainer.train('./data/imgs/test/', './data/keypoints/test/')
+if __name__ == '__main__':
+    with open('config/config.yaml') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+    g_net = build_stacked_hourglass(config)
+    d_net = build_d(config)
+    g_model, d_model = build_gan(g_net, d_net, config)
+    trainer = Trainer(config, g_model, d_model, train_on_gan=True)
+    if not os.path.exists('/media/newbot/software/Pose-Transfer-master/fashion_data'):
+        raise Exception
+    trainer.train('/media/newbot/software/Pose-Transfer-master/fashion_data/train/',
+                   '/media/newbot/software/Pose-Transfer-master/fashion_data/trainK/')

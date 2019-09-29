@@ -28,17 +28,17 @@ def residual_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
     residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(residual)
-    return x + residual
+    return Lambda(lambda z: z[0]+z[1])([x, residual])
 
 
-def Encode_block(x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
+def encode_block(x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
     x = residual_block(x, n_filters, kernel_size=kernel_size,
                        strides = strides, padding = padding)
     x = downsampling(x, n_filters)
     return x
 
 
-def Decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
+def decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
     if not x == None:
         x = keras.layers.concatenate(inputs=[y, x])
     x = residual_block(x, n_filters, kernel_size=kernel_size,
@@ -50,12 +50,10 @@ def Decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
     return x
 
 
-def hourglass(x, n_filters, kernel_size, strides=1, padding='same'):
-    pass
-
-
 def v_hourglass(a, p, n_filters, kernel_size, strides=1, padding='same'):
-    pass
+
+    x = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=strides, padding=padding)(a)
+    return x, x
 
 
 

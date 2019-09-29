@@ -1,6 +1,7 @@
 from generator.dataIter import DataIter
 
-class Gan_Trainer():
+
+class Trainer:
     def __init__(self, config, g_model, d_model, preprocess=True, re_train=True, train_on_gan=False,
                  batch_size=6):
         self.g_model = g_model
@@ -23,13 +24,13 @@ class Gan_Trainer():
             if not self.re_train:
                 self.g_model.load_weights(self.config['load_dir'] + 'g_model.h5')
                 self.d_model.load_weights(self.config['load_dir'] + 'd_model.h5')
-            for epoch in self.config['epochs']:
-                for step in self.config['steps']:
-                    img, pose_img = next(train_generator)
-                    x_real = img
-                    x_fake = self.g_model.predict(x_real)
-                    g_loss = self.g_model.train_on_batch([pose_img, x_fake, x_real])
-                    d_loss = self.d_model.train_on_batch([x_real, x_fake])
+            for epoch in range(self.config['epochs']):
+                for step in range(self.config['steps']):
+                    img, pose_img, target_img, target_pose = next(train_generator)
+                    x_real = target_img
+                    # x_fake = self.g_model.predict(img, target_pose)
+                    g_loss = self.g_model.train_on_batch([img, target_pose, x_real], None)
+                    d_loss = self.d_model.train_on_batch([img, target_pose, x_real], None)
                     print("Epoch: {}, steps: {}, g_loss: {}, d_loss: {}".format(epoch, step, g_loss, d_loss))
         else:
             # load pre_retained model
@@ -37,10 +38,10 @@ class Gan_Trainer():
                 self.g_model.load_weights(self.config['load_dir'] + 'g_model.h5')
             for epoch in self.config['epochs']:
                 for step in self.config['steps']:
-                    img, pose_img = next(train_generator)
+                    img, pose_img, target_img, target_pose = next(train_generator)
                     x_real = img
-                    x_fake = self.g_model.predict(x_real)
-                    g_loss = self.g_model.train_on_batch([pose_img, x_fake, x_real])
+                    # x_fake = self.g_model.predict(x_real)
+                    g_loss = self.g_model.train_on_batch([img, target_pose, x_real], x_real)
                     print("Epoch: {}, steps: {}, g_loss: {}".format(epoch, step, g_loss))
 
     def save(self):
