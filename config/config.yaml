@@ -6,5 +6,8 @@ p_channels: 18
 p_height: 256
 p_width: 256
 
-epochs: 50
-steps: 1000
+epochs: 200
+steps: 100
+
+save_dir: './'
+load_dir: './'

@@ -18,13 +18,13 @@ def subpixel(x, h_factor, w_factor):
 
 
 def residual_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
-    residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
+    residual1 = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(x)
-    residual = Conv2D(filters=n_filters, kernel_size=kernel_size,
+    residual2 = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
-               activation='relu')(residual)
-    return Lambda(lambda z: z[0]+z[1])([x, residual])
+               activation='relu')(residual1)
+    return Lambda(lambda z: z[0]+z[1])([residual1, residual2])
 
 
 def encode_block(x, n_filters, kernel_size=3, strides = 1, padding = 'same'):

@@ -28,27 +28,26 @@ class Trainer:
                 self.d_model.load_weights(self.config['load_dir'] + 'd_model.h5')
             for epoch in range(self.config['epochs']):
                 for step in range(self.config['steps']):
+                    g_loss = 0
                     img, pose_img, target_img, target_pose = next(train_generator)
                     x_real = target_img
-                    # import cv2
-                    # cv2.imshow('window', img)
-                    # cv2.waitKey(0)
-
-                    # x_fake = self.g_model.predict(img, target_pose)
-                    g_loss = self.g_model.train_on_batch([img, target_pose, x_real], None)
                     d_loss = self.d_model.train_on_batch([img, target_pose, x_real], None)
+                    for i in range(2):
+                        g_loss = self.g_model.train_on_batch([img, target_pose, x_real], None)
+                        img, pose_img, target_img, target_pose = next(train_generator)
+                        x_real = target_img
                     print("Epoch: {}, steps: {}, g_loss: {}, d_loss: {}".format(epoch, step, g_loss, d_loss))
-                    test_img, test_pose_img, test_target_img, test_target_pose = next(train_generator)
-                    predicted = self.g_net.predict([test_img, test_target_pose])
-                    cv2.imshow('window', predicted[0])
-                    cv2.waitKey(800)
-                    cv2.imshow('window2', test_target_img[0])
-                    cv2.waitKey(800)
-                    cv2.imshow('window3', test_img[0])
-                    cv2.waitKey(800)
-                    cv2.destroyAllWindows()
                 print("saving model......")
                 self.save()
+                test_img, test_pose_img, test_target_img, test_target_pose = next(train_generator)
+                predicted = self.g_net.predict([test_img, test_target_pose])
+                cv2.imshow('window', predicted[0])
+                cv2.waitKey(800)
+                cv2.imshow('window2', test_target_img[0])
+                cv2.waitKey(800)
+                cv2.imshow('window3', test_img[0])
+                cv2.waitKey(800)
+                cv2.destroyAllWindows()
         else:
             # load pre_retained model
             if not self.re_train:
