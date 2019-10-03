@@ -1,4 +1,4 @@
-batch_size: 6
+batch_size: 12
 img_channels: 3
 img_height: 256
 img_width: 256
@@ -7,7 +7,7 @@ p_height: 256
 p_width: 256
 
 epochs: 200
-steps: 100
+steps: 10
 
 save_dir: './'
 load_dir: './'

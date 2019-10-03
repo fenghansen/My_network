@@ -6,6 +6,7 @@ from model.loss import get_dloss, get_gloss
 
 
 
+
 def build_g(config):
     # feature extraction
     img_height = config['img_height']
@@ -92,13 +93,13 @@ def build_d(config):
     channels = config['img_channels']
 
     input_img = Input(shape=(img_height, img_width, channels))
-
-    x = Conv2D(filters=64, kernel_size=3, strides=2, padding='same', activation='relu')(input_img)
-    x = residual_block(x, n_filters=128, kernel_size=3, strides=1, padding='same')
-    x = Conv2D(filters=256, kernel_size=3, strides=2, padding='same', activation='relu')(x)
-    x = residual_block(x, n_filters=512, kernel_size=3, strides=1, padding='same')
-    output = Conv2D(filters=3, kernel_size=3, strides=2, padding='same', activation='relu')(x)
-    score = Lambda(lambda z: K.mean(K.sigmoid(z)))(output)
+    x = Conv2D(filters=64, kernel_size=4, strides=2, padding='same')(input_img)
+    x = keras.layers.LeakyReLU(0.2)(x)
+    x = d_block(x, filters=128, kernel_size=4, strides=2, padding='same')
+    x = d_block(x, filters=256, kernel_size=4, strides=2, padding='same')
+    x = d_block(x, filters=512, kernel_size=4, strides=2, padding='same')
+    output = Conv2D(filters=1, kernel_size=4, strides=1, padding='same', activation='sigmoid')(x)
+    score = Lambda(lambda z: K.mean(z))(output)
     model = Model(inputs=input_img, outputs=score)
     return model
 
@@ -138,7 +139,7 @@ def build_gan(g_net, d_net, config):
     real_score = d_net(x_real)
     fake_score = d_net(x_fake)
 
-    d_train_model = Model(inputs=[x_in, y_hat, gt], outputs=real_score)
+    d_train_model = Model(inputs=[x_in, y_hat, gt], outputs=[real_score, fake_score])
 
     # eps = np.random.rand()
     # x_inter = x_real * eps + (1.-eps) * x_fake
@@ -148,14 +149,14 @@ def build_gan(g_net, d_net, config):
     gradient_penalty = 0
 
     d_loss = get_dloss(real_score, fake_score)
-    d_train_model.add_loss(K.mean(d_loss))
+    d_train_model.add_loss(d_loss)
     d_train_model.compile(optimizer=Adam(lr=2e-4))
 
     g_net.trainable = True
     d_net.trainable = False
 
-    g_train_model = Model(inputs=[x_in, y_hat, gt], outputs=fake_score)
+    g_train_model = Model(inputs=[x_in, y_hat, gt], outputs=[fake_score, x_fake, x_real])
     g_loss = get_gloss(fake_score, x_fake, x_real)
-    g_train_model.add_loss(K.mean(g_loss))
+    g_train_model.add_loss(g_loss)
     g_train_model.compile(optimizer=Adam(lr=2e-4))
     return g_train_model, d_train_model

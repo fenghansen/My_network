@@ -13,7 +13,7 @@ class DataIter:
 
     def gen_next(self):
         while True:
-            file_names = random.sample(self.file_set, k=2 * self.batch_size)
+            file_names = random.sample(self.file_set, k=self.batch_size)
             imgs = []
             keypoints = []
             for file in file_names:
@@ -21,9 +21,18 @@ class DataIter:
                 keypoint = np.load(self.keypoint_dir + file + '.npy')
                 imgs.append(img)
                 keypoints.append(keypoint)
-            input_img = np.array(imgs)[:self.batch_size, :, :, :]
+            for file in file_names:
+                target_set = [name for name in self.file_set if name.startswith(file[:file.rfind('_')])]
+                new_name = random.choice(target_set)
+                img = np.array(cv2.imread(self.img_dir + new_name))
+                keypoint = np.load(self.keypoint_dir + new_name + '.npy')
+                imgs.append(img)
+                keypoints.append(keypoint)
+            normalized = np.array(imgs, dtype=np.float32)
+            normalized = normalized * 1./255
+            input_img = normalized[:self.batch_size, :, :, :]
             input_k = np.array(keypoints)[:self.batch_size, :, :, :]
-            target_img = np.array(imgs)[self.batch_size:, :, :, :]
+            target_img = normalized[self.batch_size:, :, :, :]
             target_k = np.array(keypoints)[self.batch_size:, :, :, :]
             yield input_img, input_k, target_img, target_k
 
@@ -34,5 +43,6 @@ if __name__ == '__main__':
     input_img, input_k, target_img, target_k = next(generator)
     print(input_img.shape, input_k.shape)
     print(target_img.shape, target_k.shape)
-    cv2.imshow('window', input_img[0])
+    cv2.imshow('input', input_img[0])
+    cv2.imshow('target', target_img[0])
     cv2.waitKey(0)

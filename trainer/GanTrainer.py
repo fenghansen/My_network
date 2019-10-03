@@ -2,14 +2,13 @@ from generator.dataIter import DataIter
 import cv2
 
 class Trainer:
-    def __init__(self, config, g_net, d_net, g_train_model, d_train_model, preprocess=True, re_train=True, train_on_gan=False,
+    def __init__(self, config, g_net, d_net, g_train_model, d_train_model, preprocess=True, train_on_gan=False,
                  batch_size=6):
         self.g_net = g_net
         self.d_net = d_net
         self.g_model = g_train_model
         self.d_model = d_train_model
         self.preprocess = preprocess
-        self.re_train = re_train
         self.config = config
         self.train_on_gan = train_on_gan
         self.batch_size = batch_size
@@ -22,10 +21,6 @@ class Trainer:
             dataIter = DataIter(img_dir, keypoint_dir, self.batch_size, False)
         train_generator = dataIter.gen_next()
         if self.train_on_gan:
-            # load pre_retained model
-            if not self.re_train:
-                self.g_model.load_weights(self.config['load_dir'] + 'g_model.h5')
-                self.d_model.load_weights(self.config['load_dir'] + 'd_model.h5')
             for epoch in range(self.config['epochs']):
                 for step in range(self.config['steps']):
                     g_loss = 0
@@ -49,9 +44,6 @@ class Trainer:
                 cv2.waitKey(800)
                 cv2.destroyAllWindows()
         else:
-            # load pre_retained model
-            if not self.re_train:
-                self.g_model.load_weights(self.config['load_dir'] + 'g_model.h5')
             for epoch in self.config['epochs']:
                 for step in self.config['steps']:
                     img, pose_img, target_img, target_pose = next(train_generator)
@@ -61,7 +53,7 @@ class Trainer:
                     print("Epoch: {}, steps: {}, g_loss: {}".format(epoch, step, g_loss))
 
     def save(self):
-        self.g_model.save(self.config['save_dir'] + 'g_model.h5')
-        self.d_model.save(self.config['save_dir'] + 'd_model.h5')
+        self.g_net.save(self.config['save_dir'] + 'g_model.h5')
+        self.d_net.save(self.config['save_dir'] + 'd_model.h5')
         print("Model saved Successfully!")
 

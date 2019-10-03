@@ -1,6 +1,7 @@
 import keras
 import keras.backend as K
-from keras.layers import Conv2D, Lambda, UpSampling2D, concatenate
+from keras.layers import Conv2D, Lambda, UpSampling2D, concatenate, BatchNormalization
+import tensorflow as tf
 
 
 def downsampling(x, n_filters):
@@ -44,6 +45,14 @@ def decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
                activation='relu')(x)
     x = Lambda(subpixel, arguments={'h_factor': 2, 'w_factor': 2})(x)
     return x
+
+
+def d_block(input, filters, kernel_size, strides, padding):
+    conv_d = Conv2D(filters=filters, kernel_size=kernel_size,
+                  strides=strides, padding=padding)(input)
+    norm_d = BatchNormalization()(conv_d)
+    re_d = keras.layers.LeakyReLU(0.2)(norm_d)
+    return re_d
 
 
 def v_hourglass(a, p, n_filters, kernel_size, strides=1, padding='same'):
