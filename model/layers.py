@@ -9,8 +9,8 @@ def downsampling(x, n_filters):
 
 
 def subpixel(x, h_factor, w_factor):
-    input_shape = K.shape(x)
-    batch_size, h, w, c = input_shape
+    input_shape = tf.shape(x)
+    batch_size, h, w, c = input_shape[0], input_shape[1], input_shape[2], input_shape[3],
     output_channels = c // (h_factor * w_factor)
     new_x = K.reshape(x, shape=(batch_size, h, w, h_factor, w_factor, output_channels))
     new_x = K.permute_dimensions(new_x, (0, 1, 3, 2, 4, 5))
@@ -25,26 +25,22 @@ def residual_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
     residual2 = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(residual1)
-    return Lambda(lambda z: z[0]+z[1])([residual1, residual2])
+    return Lambda(lambda z: z[0]+z[1])([x, residual2])
 
 
-def encode_block(x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
-    x = residual_block(x, n_filters, kernel_size=kernel_size,
-                       strides = strides, padding = padding)
-    x = downsampling(x, n_filters)
-    return x
+def encode_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
+    conv = Conv2D(filters=n_filters, kernel_size=kernel_size, strides=strides, padding=padding)(x)
+    bn = BatchNormalization()(conv)
+    re = keras.layers.LeakyReLU(0.2)(bn)
+    return re
 
 
-def decode_block(y, x, n_filters, kernel_size=3, strides = 1, padding = 'same'):
-    if not x == None:
-        x = keras.layers.concatenate(inputs=[y, x])
-    x = residual_block(x, n_filters, kernel_size=kernel_size,
-                       strides=strides, padding=padding)
+def decode_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
     x = Conv2D(filters=4 * n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(x)
-    x = Lambda(subpixel, arguments={'h_factor': 2, 'w_factor': 2})(x)
-    return x
+    out = Lambda(lambda z: tf.nn.depth_to_space(z, block_size=2))(x)
+    return out
 
 
 def d_block(input, filters, kernel_size, strides, padding):

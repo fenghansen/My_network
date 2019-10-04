@@ -1,4 +1,4 @@
-from model.network import build_g, build_d, build_gan
+from model.network import build_g, build_d, build_gan, build_res
 import yaml
 from trainer.GanTrainer import Trainer
 import os
@@ -8,7 +8,7 @@ os.environ['CUDA_VISIBLE_DEVICE'] = '0'
 if __name__ == '__main__':
     with open('config/config.yaml') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    g_net = build_g(config)
+    g_net = build_res(config)
     d_net = build_d(config)
 
     load_weights = False

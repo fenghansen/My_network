@@ -19,9 +19,9 @@ def build_g(config):
     input_img = Input(shape=(img_height, img_width, channels))
     input_pose = Input(shape=(p_height, p_width, p_channels))
 
-    network_input = keras.layers.concatenate([input_img, input_pose])
+    net_input = keras.layers.concatenate([input_img, input_pose])
 
-    conv1 = encode_block(network_input, n_filters=64, kernel_size=3, strides=1, padding='same')
+    conv1 = encode_block(net_input, n_filters=64, kernel_size=3, strides=1, padding='same')
     conv2 = encode_block(conv1, 128, 3, 1, padding='same')
 
     conv3 = encode_block(conv2, 256, 3, 1, padding='same')
@@ -53,6 +53,38 @@ def build_g(config):
     up6 = Conv2D(filters=64, kernel_size=3, strides=1, padding='same', activation='relu')(up6)
 
     output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same', activation='sigmoid')(up6)
+    model = Model(inputs=[input_img, input_pose], outputs=[output])
+    return model
+
+
+def build_res(config):
+    img_height = config['img_height']
+    img_width = config['img_width']
+    channels = config['img_channels']
+    p_height = config['p_height']
+    p_width = config['p_width']
+    p_channels = config['p_channels']
+
+    input_img = Input(shape=(img_height, img_width, channels))
+    input_pose = Input(shape=(p_height, p_width, p_channels))
+    net_input = keras.layers.concatenate([input_img, input_pose])
+
+    conv1 = encode_block(net_input, 64, 3, 2, 'same')
+    conv2 = encode_block(conv1, 128, 3, 2, 'same')
+    conv3 = encode_block(conv2, 256, 3, 2, 'same')
+    conv4 = encode_block(conv3, 512, 3, 2, 'same')
+
+    res1 = residual_block(conv4, 512, 3, 1, 'same')
+    res2 = residual_block(res1, 512, 3, 1, 'same')
+    res3 = residual_block(res2, 512, 3, 1, 'same')
+    res4 = residual_block(res3, 512, 3, 1, 'same')
+
+    deconv1 = decode_block(x=res4, n_filters=512, kernel_size=3, strides=1, padding='same')
+    deconv2 = decode_block(x=deconv1, n_filters=256, kernel_size=3, strides=1, padding='same')
+    deconv3 = decode_block(x=deconv2, n_filters=128, kernel_size=3, strides=1, padding='same')
+    deconv4 = decode_block(x=deconv3, n_filters=64, kernel_size=3, strides=1, padding='same')
+
+    output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same', activation='sigmoid')(deconv4)
     model = Model(inputs=[input_img, input_pose], outputs=[output])
     return model
 
