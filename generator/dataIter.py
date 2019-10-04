@@ -24,6 +24,8 @@ class DataIter:
             for file in file_names:
                 target_set = [name for name in self.file_set if name.startswith(file[:file.rfind('_')])]
                 new_name = random.choice(target_set)
+                while new_name == file:
+                    new_name = random.choice(target_set)
                 img = np.array(cv2.imread(self.img_dir + new_name))
                 keypoint = np.load(self.keypoint_dir + new_name + '.npy')
                 imgs.append(img)

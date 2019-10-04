@@ -84,7 +84,7 @@ def build_res(config):
     deconv3 = decode_block(x=deconv2, n_filters=128, kernel_size=3, strides=1, padding='same')
     deconv4 = decode_block(x=deconv3, n_filters=64, kernel_size=3, strides=1, padding='same')
 
-    output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same', activation='sigmoid')(deconv4)
+    output = Conv2D(filters=3, kernel_size=3, strides=1, padding='same')(deconv4)
     model = Model(inputs=[input_img, input_pose], outputs=[output])
     return model
 

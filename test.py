@@ -3,6 +3,7 @@ from generator.dataIter import DataIter
 import cv2
 import yaml
 import os
+import numpy as np
 
 os.environ['CUDA_VISIBLE_DEVICE'] = '0'
 
@@ -19,6 +20,7 @@ if __name__ == '__main__':
     while True:
         img, pose_img, target_img, target_pose = next(test_gen)
         predicted = g_net.predict([img, target_pose])
+        predicted = np.array(predicted * 255, dtype=np.uint8)
         cv2.imshow('pred', predicted[0])
         cv2.imshow('img', img[0])
         cv2.imshow('target', target_img[0])
