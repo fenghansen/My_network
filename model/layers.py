@@ -22,6 +22,7 @@ def residual_block(x, n_filters, kernel_size=3, strides=1, padding='same'):
     residual1 = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(x)
+    residual1 = BatchNormalization()(residual1)
     residual2 = Conv2D(filters=n_filters, kernel_size=kernel_size,
                strides=strides, padding=padding,
                activation='relu')(residual1)

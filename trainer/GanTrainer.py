@@ -3,7 +3,7 @@ import cv2
 
 class Trainer:
     def __init__(self, config, g_net, d_net, g_train_model, d_train_model, preprocess=True, train_on_gan=False,
-                 batch_size=6):
+                 ):
         self.g_net = g_net
         self.d_net = d_net
         self.g_model = g_train_model
@@ -11,7 +11,7 @@ class Trainer:
         self.preprocess = preprocess
         self.config = config
         self.train_on_gan = train_on_gan
-        self.batch_size = batch_size
+        self.batch_size = config['batch_size']
 
     def train(self, img_dir, keypoint_dir):
         # train using image_generator
