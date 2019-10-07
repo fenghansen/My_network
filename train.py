@@ -11,7 +11,7 @@ if __name__ == '__main__':
     g_net = build_res(config)
     d_net = build_d(config)
 
-    load_weights = False
+    load_weights = True
     if load_weights:
         g_net.load_weights(config['load_dir'] + 'g_model.h5')
         d_net.load_weights(config['load_dir'] + 'd_model.h5')
@@ -27,5 +27,6 @@ if __name__ == '__main__':
     if not os.path.exists('/media/newbot/software/Pose-Transfer-master/fashion_data'):
         raise Exception
     trainer.train('/media/newbot/software/Pose-Transfer-master/fashion_data/train/',
-                   '/media/newbot/software/Pose-Transfer-master/fashion_data/trainK/')
+                   '/media/newbot/software/Pose-Transfer-master/fashion_data/trainK/',
+                  '/media/newbot/software/Pose-Transfer-master/fashion_data/fasion-resize-pairs-train.csv')
 

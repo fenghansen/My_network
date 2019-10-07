@@ -16,7 +16,7 @@ if __name__ == '__main__':
     g_net.load_weights(config['load_dir'] + 'g_model.h5')
     img_dir = "/media/newbot/software/Pose-Transfer-master/fashion_data/test/"
     keypoint_dir = "/media/newbot/software/Pose-Transfer-master/fashion_data/testK/"
-    dataIter = DataIter(img_dir, keypoint_dir, 1, True)
+    dataIter = DataIter(img_dir, keypoint_dir, './data/fasion-resize-pairs-test.csv', 1)
     test_gen = dataIter.gen_next()
     while True:
         img, pose_img, target_img, target_pose = next(test_gen)

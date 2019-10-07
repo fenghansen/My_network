@@ -1,4 +1,4 @@
-batch_size: 12
+batch_size: 16
 img_channels: 3
 img_height: 256
 img_width: 256

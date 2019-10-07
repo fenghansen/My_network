@@ -12,14 +12,13 @@ class Trainer:
         self.preprocess = preprocess
         self.config = config
         self.train_on_gan = train_on_gan
-        self.batch_size = config['batch_size']
 
-    def train(self, img_dir, keypoint_dir):
+    def train(self, img_dir, keypoint_dir, csv_dir):
         # train using image_generator
         if self.preprocess == True:
-            dataIter = DataIter(img_dir, keypoint_dir, self.batch_size, True)
+            dataIter = DataIter(img_dir, keypoint_dir, csv_dir, batch_size=self.config['batch_size'])
         else:
-            dataIter = DataIter(img_dir, keypoint_dir, self.batch_size, False)
+            dataIter = DataIter(img_dir, keypoint_dir, csv_dir, batch_size=self.config['batch_size'])
         train_generator = dataIter.gen_next()
         if self.train_on_gan:
             for epoch in range(self.config['epochs']):

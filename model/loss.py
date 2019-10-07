@@ -39,7 +39,7 @@ def get_gloss(fake_score, x_fake, x_real):
     adverarial_loss = -K.log(1 - fake_score + 1e-9)
     perceptual_loss = K.mean(Vgg_loss(x_fake, x_real))
     l1 = K.mean(l1_norm(x_fake, x_real))
-    return K.mean(adverarial_loss) + 0.05 * perceptual_loss +  l1
+    return K.mean(adverarial_loss) + 0.05 * perceptual_loss + l1
 
 
 def get_dloss(real_score, fake_score):
