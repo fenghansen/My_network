@@ -1,5 +1,6 @@
 from generator.dataIter import DataIter
 import cv2
+import numpy as np
 
 class Trainer:
     def __init__(self, config, g_net, d_net, g_train_model, d_train_model, preprocess=True, train_on_gan=False,
@@ -36,12 +37,13 @@ class Trainer:
                 self.save()
                 test_img, test_pose_img, test_target_img, test_target_pose = next(train_generator)
                 predicted = self.g_net.predict([test_img, test_target_pose])
-                cv2.imshow('window', predicted[0])
-                cv2.waitKey(800)
-                cv2.imshow('window2', test_target_img[0])
-                cv2.waitKey(800)
-                cv2.imshow('window3', test_img[0])
-                cv2.waitKey(800)
+                predicted = np.array(predicted * 255, dtype=np.uint8)
+                cv2.imshow('pred', predicted[0])
+                cv2.waitKey(1000)
+                cv2.imshow('target', test_target_img[0])
+                cv2.waitKey(1000)
+                cv2.imshow('input', test_img[0])
+                cv2.waitKey(1000)
                 cv2.destroyAllWindows()
         else:
             for epoch in self.config['epochs']:
